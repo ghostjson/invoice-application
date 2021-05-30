@@ -28,3 +28,19 @@ def dbGET(query):
 	print("dbGET execution finished" + "\n\n\n")
    
 	return formated
+
+
+# update db commands
+@eel.expose
+def dbUPDATE(query):
+
+	print("dbUPDATE execution started\n\n\n")
+	print("Query going to execute is " + query + "\n\n\n")
+
+	conn = sqlite3.connect(DB)
+
+	db = conn.cursor()
+	conn.execute(query)
+	conn.commit()
+
+	print("dbUPDATE excution finished" + "\n\n\n")

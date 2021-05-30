@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Items</title>
+
+    <script type="text/javascript" src="/eel.js"></script>
+    <script type="text/javascript" src="./assets/js/vue.js"></script>
+
+    <link rel="stylesheet" href="assets/css/materialize.min.css" />
+    <script type="text/javascript" src="assets/js/materialize.min.js"></script>
+
+    <script type="text/javascript" src="assets/js/jquery.js"></script>
+
+    <link rel="stylesheet" href="assets/css/jquery.dataTables.min.css" />
+    <script
+      type="text/javascript"
+      src="assets/js/jquery.dataTables.min.js"
+    ></script>
+  </head>
+  <body>
+    <nav class="grey darken-4">
+      <div class="nav-wrapper">
+        <a href="#" class="brand-logo">
+          <img width="250px" src="assets/images/logo.png" />
+        </a>
+        <ul id="nav-mobile" class="right hide-on-med-and-down">
+          <li><a href="invoices.html">Invoices</a></li>
+          <li><a href="items.html">Items</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <div id="app">
+      <div class="">
+        <div class="row">
+          <div class="col s12">
+            <h3>Items</h3>
+
+            <div class="card">
+              <div class="card-stacked">
+                <div class="card-content">
+                  <ul class="collection">
+                    <li class="collection-item">
+                      <strong>Item ID: </strong> {{ item['item_id'] }}
+                    </li>
+                    <li class="collection-item">
+                      <strong>Name: </strong> {{ item['name'] }}
+                    </li>
+                    <li class="collection-item">
+                      <strong>Category: </strong> {{ item['category'] }}
+                    </li>
+                    <li class="collection-item">
+                      <strong>rff: </strong> {{ item['rff']}}
+                    </li>
+                    <li class="collection-item">
+                      <strong>Specification: </strong> {{
+                      item['specification']}}
+                    </li>
+                    <li class="collection-item">
+                      <strong>Performance: </strong> {{ item['performance']}}
+                    </li>
+                    <li class="collection-item">
+                      <strong>CPC: </strong> {{ item['cpc'] }}
+                    </li>
+                  </ul>
+									<div>
+										<a class="waves-effect waves-light btn grey darken-4" :href="`item_edit.html?id=${item['item_id']}`">Edit</a>
+										<a class="waves-effect waves-light btn red" href="#" v-on:click="deleteItem">Delete</a>
+									</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      const app = new Vue({
+        el: "#app",
+        data: {
+          item: null,
+          params: [],
+        },
+        methods: {
+					deleteItem(){
+						const confirmation = confirm(`Are you sure you want to delete ${this.item['name']}?`)
+						if(confirmation){
+							eel.dbUPDATE(`DELETE FROM Items WHERE item_id=${this.item['item_id']}`)
+							alert("Successfully deleted!")
+							window.location = "items.html"
+						}
+					},
+          getParams: function () {
+            if (location.search) {
+              var parts = location.search.substring(1).split("&");
+
+              for (var i = 0; i < parts.length; i++) {
+                var nv = parts[i].split("=");
+                if (!nv[0]) continue;
+                this.params[nv[0]] = nv[1] || true;
+              }
+            }
+          },
+        },
+        created: function () {
+          this.getParams();
+
+          const id = this.params.id;
+
+          eel.dbGET("SELECT * FROM Items WHERE item_id=" + id)((response) => {
+            this.item = JSON.parse(response)[0];
+
+            console.log(this.item);
+          });
+        },
+      });
+    </script>
+    <script></script>
+  </body>
+</html>
