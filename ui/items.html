@@ -35,9 +35,10 @@
 			<div class="">
 				
 				<div class="row">
-					<div class="col s12">
+					<div class="col s12" style="position:relative">
 
 						<h3>Items</h3>
+						<a href="item_create.html" style="position:absolute;right:10px; top: 30px;" class="btn">Create</a>
 
 						<div style="margin: 10px">
 							<table id="table" class="display" width="100%">
@@ -77,7 +78,7 @@
 					items: null,
 				},
 				created: function(){
-					eel.dbGET('SELECT * FROM Items LIMIT 20')(response => {
+					eel.dbGET('SELECT * FROM Items')(response => {
 					console.log(JSON.parse(response))
 					this.items = JSON.parse(response)
 
