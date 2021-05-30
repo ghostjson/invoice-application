@@ -3,9 +3,25 @@
 	<head>
 		<script type="text/javascript" src="/eel.js"></script>
 		<script type="text/javascript" src="./assets/js/vue.js"></script>
+
+		<link rel="stylesheet" href="assets/css/materialize.min.css">
+		<script type="text/javascript" src="assets/js/materialize.min.js"></script>
 	</head>
 	<body>
-		<h2>Working</h2>
+		<div id="app">
+			{{ message }}	
+
+			<a class="waves-effect waves-light btn">button</a>
+		</div>
+		<script>
+			const app = new Vue({
+				el: '#app',
+				data: {
+					message: 'Hello'
+				}
+			})
+
+		</script>
 		<script>
 			window.onload = function () {
 				console.log('function invoked')
