@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Items</title>
+    <title>Item</title>
 
     <script type="text/javascript" src="/eel.js"></script>
     <script type="text/javascript" src="./assets/js/vue.js"></script>
@@ -61,9 +61,13 @@
                     </li>
                     <li class="collection-item">
                       <strong>CPC: </strong> {{ item['cpc'] }}
-                    </li>
+										</li>
+										<li class="collection-item">
+											<strong>Price: </strong> {{ 0 }}
+										</li>
                   </ul>
 									<div>
+										<a class="waves-effect waves-light btn" :href="`materials_for_item.html?id=${item['item_id']}`">Edit Materials</a>
 										<a class="waves-effect waves-light btn grey darken-4" :href="`item_edit.html?id=${item['item_id']}`">Edit</a>
 										<a class="waves-effect waves-light btn red" href="#" v-on:click="deleteItem">Delete</a>
 									</div>
@@ -106,6 +110,7 @@
           this.getParams();
 
           const id = this.params.id;
+
 
           eel.dbGET("SELECT * FROM Items WHERE item_id=" + id)((response) => {
             this.item = JSON.parse(response)[0];

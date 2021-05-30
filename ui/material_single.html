@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Material</title>
+
+    <script type="text/javascript" src="/eel.js"></script>
+    <script type="text/javascript" src="./assets/js/vue.js"></script>
+
+    <link rel="stylesheet" href="assets/css/materialize.min.css" />
+    <script type="text/javascript" src="assets/js/materialize.min.js"></script>
+
+    <script type="text/javascript" src="assets/js/jquery.js"></script>
+
+    <link rel="stylesheet" href="assets/css/jquery.dataTables.min.css" />
+    <script
+      type="text/javascript"
+      src="assets/js/jquery.dataTables.min.js"
+    ></script>
+  </head>
+  <body>
+    <nav class="grey darken-4">
+      <div class="nav-wrapper">
+        <a href="#" class="brand-logo">
+          <img width="250px" src="assets/images/logo.png" />
+        </a>
+        <ul id="nav-mobile" class="right hide-on-med-and-down">
+          <li><a href="invoices.html">Invoices</a></li>
+          <li><a href="items.html">Items</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <div id="app">
+      <div class="">
+        <div class="row">
+          <div class="col s12">
+            <h3>Items</h3>
+
+            <div class="card">
+              <div class="card-stacked">
+                <div class="card-content">
+                  <ul class="collection">
+                    <li class="collection-item">
+                      <strong>Material ID: </strong> {{ material['material_id'] }}
+                    </li>
+                    <li class="collection-item">
+                      <strong>Name: </strong> {{ material['name'] }}
+                    </li>
+                    <li class="collection-item">
+                      <strong>Price: </strong> {{ material['price'] }}
+                    </li>
+                    <li class="collection-item">
+                      <strong>Unit: </strong> {{ material['unit']}}
+                    </li>
+                    <li class="collection-item">
+                      <strong>Unit Price: </strong> {{ material['unitPrice']}}
+                    </li>
+                    <li class="collection-item">
+                      <strong>Vae Mat: </strong> {{ material['vaeMat']}}
+                    </li>
+                    <li class="collection-item">
+                      <strong>Vae Trans: </strong> {{ material['vaeTrans'] }}
+										</li>
+										<li class="collection-item">
+											<strong>CPC Mat: </strong> {{ material['cpcMat'] }}
+										</li>
+										<li class="collection-item">
+											<strong>CPC Trans: </strong> {{ material['cpcTrans']}}
+										</li>
+                  </ul>
+									<div>
+										<a class="waves-effect waves-light btn grey darken-4" :href="`material_edit.html?id=${material['material_id']}`">Edit</a>
+										<a class="waves-effect waves-light btn red" href="#" v-on:click="deleteItem">Delete</a>
+									</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      const app = new Vue({
+        el: "#app",
+        data: {
+          item: null,
+          params: [],
+					material: null,
+        },
+        methods: {
+					deleteItem(){
+						const confirmation = confirm(`Are you sure you want to delete ${this.material['material']}?`)
+						if(confirmation){
+							eel.dbUPDATE(`DELETE FROM Materials WHERE material_id=${this.material['material_id']}`)
+							alert("Successfully deleted!")
+							window.location = "items.html"
+						}
+					},
+          getParams: function () {
+            if (location.search) {
+              var parts = location.search.substring(1).split("&");
+
+              for (var i = 0; i < parts.length; i++) {
+                var nv = parts[i].split("=");
+                if (!nv[0]) continue;
+                this.params[nv[0]] = nv[1] || true;
+              }
+            }
+          },
+        },
+        created: function () {
+          this.getParams();
+
+          const id = this.params.id;
+
+
+          eel.dbGET("SELECT * FROM Materials WHERE material_id=" + id)((response) => {
+            this.material = JSON.parse(response)[0];
+						console.log(this.material);
+          });
+        },
+      });
+    </script>
+    <script></script>
+  </body>
+</html>

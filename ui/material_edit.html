@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Material Edit</title>
+
+    <script type="text/javascript" src="/eel.js"></script>
+    <script type="text/javascript" src="./assets/js/vue.js"></script>
+
+    <link rel="stylesheet" href="assets/css/materialize.min.css" />
+    <script type="text/javascript" src="assets/js/materialize.min.js"></script>
+
+  </head>
+  <body>
+    <nav class="grey darken-4">
+      <div class="nav-wrapper">
+        <a href="#" class="brand-logo">
+          <img width="250px" src="assets/images/logo.png" />
+        </a>
+        <ul id="nav-mobile" class="right hide-on-med-and-down">
+          <li><a href="invoices.html">Invoices</a></li>
+          <li><a href="items.html">Items</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <div id="app">
+      <div class="">
+        <div class="row">
+          <div class="col s12">
+            <h3>Material Edit</h3>
+
+            <div class="card">
+              <div class="card-stacked">
+                <div class="card-content">
+									<form classrow>
+										<div class="s12">
+											<div class="input-field">
+												<label for="name" class="active">Name: </label>
+												<input id="name" type="text" class="validate" v-model="material['name']">
+											</div>
+											<div class="input-field">
+												<label for="price" class="active">Price: </label>
+												<input id="price" type="text" class="validate" v-model="material['price']">
+											</div>
+											<div class="input-field">
+												<label for="unit" class="active">Unit: </label>
+												<input id="unit" type="text" class="validate" v-model="material['unit']">
+											</div>
+											<div class="input-field">
+												<label for="unit_price" class="active">Unit Price: </label>
+												<input id="unit_price" type="text" class="validate" v-model="material['specification']">
+											</div>
+											<div class="input-field">
+												<label for="vae_mat" class="active">Vae Mat: </label>
+												<input id="vae_mat" type="text" class="validate" v-model="material['vaeMat']">
+											</div>
+											<div class="input-field">
+												<label for="vae_trans" class="active">Vae Trans: </label>
+												<input id="vae_trans" type="text" class="validate" v-model="material['vaeTrans']">
+											</div>
+											<div class="input-field">
+												<label for="cpc_mat" class="active">CPC Mat: </label>
+												<input id="cpc_mat" type="text" class="validate" v-model="material['cpcMat']">
+											</div>
+											<div class="input-field">
+												<label for="cpc_trans" class="active">CPC Trans: </label>
+												<input id="cpc_trans" type="text" class="validate" v-model="material['cpcTrans']">
+											</div>
+										</div>
+
+										<button type="button" class="btn" @click="update">Update</button>
+									</form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      const app = new Vue({
+        el: "#app",
+        data: {
+          material: null,
+          params: [],
+        },
+        methods: {
+					update(){
+						const material = this.material
+						eel.dbUPDATE(`UPDATE Materials SET name='${material['name']}', price='${material['price']}', unit='${material['unit']}', unitPrice='${material['unitPrice']}', vaeMat='${material['vaeMat']}', vaeTrans='${material['vaeTrans']}', cpcMat='${material['cpcMat']}', cpcTrans='${material['cpcTrans']}' WHERE material_id=${material['material_id']}`)
+						alert('updated successfully!')
+					},
+          getParams: function () {
+            if (location.search) {
+              var parts = location.search.substring(1).split("&");
+
+              for (var i = 0; i < parts.length; i++) {
+                var nv = parts[i].split("=");
+                if (!nv[0]) continue;
+                this.params[nv[0]] = nv[1] || true;
+              }
+            }
+          },
+        },
+        created: function () {
+          this.getParams();
+
+          const id = this.params.id;
+
+					console.log(id)
+
+          eel.dbGET("SELECT * FROM Materials WHERE material_id=" + id)((response) => {
+            this.material = JSON.parse(response)[0];
+						console.log(this.material);
+          });
+        },
+      });
+    </script>
+    <script></script>
+  </body>
+</html>
