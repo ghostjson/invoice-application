@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<script type="text/javascript" src="/eel.js"></script>
+		<script type="text/javascript" src="./assets/js/vue.js"></script>
+	</head>
+	<body>
+		<h2>Working</h2>
+		<script>
+			window.onload = function () {
+				console.log('function invoked')
+				
+				eel.dbGET('SELECT * FROM Items LIMIT 10')(response => {
+					console.log(JSON.parse(response))
+				})
+			}
+		</script>
+	</body>
+</html>
