@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Equipments</title>
+
+    <script type="text/javascript" src="/eel.js"></script>
+    <script type="text/javascript" src="./assets/js/vue.js"></script>
+
+    <link rel="stylesheet" href="assets/css/materialize.min.css" />
+    <script type="text/javascript" src="assets/js/materialize.min.js"></script>
+
+    <script type="text/javascript" src="assets/js/jquery.js"></script>
+
+    <link rel="stylesheet" href="assets/css/jquery.dataTables.min.css" />
+    <script
+      type="text/javascript"
+      src="assets/js/jquery.dataTables.min.js"
+    ></script>
+  </head>
+  <body>
+    <nav class="grey darken-4">
+      <div class="nav-wrapper">
+        <a href="#" class="brand-logo">
+          <img width="250px" src="assets/images/logo.png" />
+        </a>
+        <ul id="nav-mobile" class="right hide-on-med-and-down">
+          <li><a href="invoices.html">Invoices</a></li>
+          <li><a href="items.html">Items</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <div id="app">
+      <div class="">
+        <div class="row">
+          <div class="col s12">
+            <h4>Equipments for {{ item['name'] }}</h3>
+
+            <div class="card">
+              <div class="card-stacked">
+                <div class="card-content">
+									<div style="margin: 10px">
+										<table id="table" class="display" width="100%" >
+											<thead>
+												<tr>
+													<th>Equipment ID</th>
+													<th>Name</th>
+													<th>Price</th>
+													<th>Pot</th>
+													<th></th>
+													<th></th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr v-for="(equipment,index) in equipments" :key="index">
+													<td>{{ equipment['equipment_id'] }} </td>
+													<td>
+														<a :href="'equipment_single.html?id='+equipment['equipment_id']">{{ equipment['name'] }}</a>
+													</td>
+													<td>{{ equipment['price'] * equipment['quantity'] }}</td>
+													<td>{{ equipment['pot'] }}</td>
+													<td></td>
+													<td>
+														<button class="waves-effect waves-light btn red" @click="remove(equipment['equipment_id'])">Remove</button>
+													</td>
+												</tr>
+											</tbody>
+											<a class="waves-effect waves-light btn" :href="`add_equipment_to_item.html?id=${id}`">Add Equipment</a>
+										</table>
+									</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      const app = new Vue({
+        el: "#app",
+        data: {
+					id: null,
+          item: null,
+          params: [],
+					equipments: null,
+        },
+        methods: {
+					remove(material_id){
+						eel.dbUPDATE(`DELETE FROM ItemsEquipments WHERE item_id='${this.id}' AND equipment_id='${equipment_id}'`)
+
+						alert("Successfully deleted!")
+						window.location.reload()
+					},
+					
+          getParams: function () {
+            if (location.search) {
+              var parts = location.search.substring(1).split("&");
+
+              for (var i = 0; i < parts.length; i++) {
+                var nv = parts[i].split("=");
+                if (!nv[0]) continue;
+                this.params[nv[0]] = nv[1] || true;
+              }
+            }
+          },
+        },
+        created: function () {
+          this.getParams();
+
+          this.id = this.params.id;
+
+					eel.dbGET("SELECT * FROM Items WHERE item_id=" + this.id)((response) => {
+            this.item = JSON.parse(response)[0];
+          });
+					
+					eel.dbGET(`SELECT * FROM Equipments INNER JOIN ItemsEquipments ON Equipments.equipment_id = ItemsEquipments.equipment_id WHERE ItemsEquipments.item_id=${this.id}`)((response) => {
+						this.equipments = JSON.parse(response);
+
+						console.log(this.equipments);
+
+						$(document).ready(function(){
+							$('#table').DataTable({
+								"searching": true,
+							})
+						})
+					})
+
+				
+        },
+      });
+    </script>
+    <script></script>
+  </body>
+</html>

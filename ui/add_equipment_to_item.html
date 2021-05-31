@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Equipment</title>
+
+    <script type="text/javascript" src="/eel.js"></script>
+    <script type="text/javascript" src="./assets/js/vue.js"></script>
+
+    <link rel="stylesheet" href="assets/css/materialize.min.css" />
+    <script type="text/javascript" src="assets/js/mateiralize.min.js"></script>
+  </head>
+  <body>
+    <nav class="grey darken-4">
+      <div class="nav-wrapper">
+        <a href="#" class="brand-logo">
+          <img width="250px" src="assets/images/logo.png" />
+        </a>
+        <ul id="nav-mobile" class="right hide-on-med-and-down">
+          <li><a href="invoices.html">Invoices</a></li>
+          <li><a href="items.html">Items</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <div id="app">
+      <div class="">
+        <div class="row">
+          <div class="col s12">
+            <h3>Items</h3>
+
+            <div class="card">
+              <div class="card-stacked">
+                <div class="card-content">
+                  <form classrow>
+                    <div class="s12">
+                      <div class="input-field">
+                        <label for="_id" class="active"
+                          >Equipment ID:
+                        </label>
+                        <input
+                          id="equipment_id"
+                          type="text"
+                          class="validate"
+                          v-model="equipment_id"
+													@change="idChanged"
+                        />
+                      </div>
+                      <div class="input-field">
+                        <label for="equipment" class="active"
+                          >Equipment Name:
+                        </label>
+                        <input
+                          @change="equipmentSelected"
+                          id="name"
+                          type="text"
+                          list="equipment_list"
+                          class="validate"
+                          v-model="equipment_name"
+                        />
+                        <datalist id="equipment_list">
+                          <option
+                            v-for="(equipment, index) in equipments"
+                            :key="index"
+                          >
+                            {{ equipment['name'] }}
+                          </option>
+                        </datalist>
+                      </div>
+                      <div class="input-field">
+                        <label for="rff" class="active">Quantity: </label>
+                        <input
+                          id="rff"
+                          type="number"
+                          class="validate"
+                          v-model="quantity"
+													step="0.001"
+                        />
+                      </div>
+                    </div>
+
+                    <button type="button" class="btn" @click="add">Add</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script type="text/javascript">
+      const app = new Vue({
+        el: "#app",
+        data: function () {
+          return {
+            id: null,
+            params: [],
+            equipment_id: null,
+            equipment_name: null,
+            equipments: null,
+            quantity: 0,
+          };
+        },
+        methods: {
+					add(){
+						eel.dbUPDATE(`INSERT INTO ItemsEquipments (quantity, item_id, equipment_id) VALUES ('${this.quantity}', '${this.id}', '${this.equipment_id}')`);
+
+						alert('Equipment is successfully added')
+						window.location = "equipments_for_item.html?id="+this.id
+					},
+					idChanged(){
+						console.log(this.equipment_id);
+						this.equipments.forEach((item) => {
+              if (item["equipment_id"] == this.equipment_id) {
+                this.equipment_name = item["name"];
+              }
+            });
+
+					},
+          equipmentSelected() {
+            this.equipments.forEach((item) => {
+              if (item["name"] === this.equipment_name) {
+                this.equipment_id = item["equipment_id"];
+              }
+            });
+          },
+          getParams: function () {
+            if (location.search) {
+              var parts = location.search.substring(1).split("&");
+
+              for (var i = 0; i < parts.length; i++) {
+                var nv = parts[i].split("=");
+                if (!nv[0]) continue;
+                this.params[nv[0]] = nv[1] || true;
+              }
+            }
+          },
+        },
+        created: function () {
+          this.getParams();
+          this.id = this.params.id;
+
+          // get all equipments id and name
+          eel.dbGET("SELECT equipment_id, name FROM Equipments")((response) => {
+            this.equipments = JSON.parse(response);
+          });
+
+        },
+      });
+    </script>
+    <script></script>
+  </body>
+</html>
