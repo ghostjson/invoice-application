@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Workforce</title>
+
+    <script type="text/javascript" src="/eel.js"></script>
+    <script type="text/javascript" src="./assets/js/vue.js"></script>
+
+    <link rel="stylesheet" href="assets/css/materialize.min.css" />
+    <script type="text/javascript" src="assets/js/materialize.min.js"></script>
+
+    <script type="text/javascript" src="assets/js/jquery.js"></script>
+
+    <link rel="stylesheet" href="assets/css/jquery.dataTables.min.css" />
+    <script
+      type="text/javascript"
+      src="assets/js/jquery.dataTables.min.js"
+    ></script>
+  </head>
+  <body>
+    <nav class="grey darken-4">
+      <div class="nav-wrapper">
+        <a href="#" class="brand-logo">
+          <img width="250px" src="assets/images/logo.png" />
+        </a>
+        <ul id="nav-mobile" class="right hide-on-med-and-down">
+          <li><a href="invoices.html">Invoices</a></li>
+          <li><a href="items.html">Items</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <div id="app">
+      <div class="">
+        <div class="row">
+          <div class="col s12">
+            <h3>Workforce</h3>
+
+            <div class="card">
+              <div class="card-stacked">
+                <div class="card-content">
+                  <ul class="collection">
+                    <li class="collection-item">
+                      <strong>Workforce ID: </strong> {{ workforce['workForce_id'] }}
+                    </li>
+                    <li class="collection-item">
+                      <strong>Name: </strong> {{ workforce['name'] }}
+                    </li>
+                    <li class="collection-item">
+                      <strong>Monthly Wage: </strong> {{ workforce['monthlyWage'] }}
+                    </li>
+                    <li class="collection-item">
+                      <strong>salarioMinimo: </strong> {{ workforce['salarioMinimo']}}
+                    </li>
+                    <li class="collection-item">
+                      <strong>DECIMO3: </strong> {{ workforce['DECIMO3']}}
+                    </li>
+										<li class="collection-item">
+                      <strong>DECIMO4: </strong> {{ workforce['DECIMO4']}}
+                    </li>
+										<li class="collection-item">
+                      <strong>DECIMO5: </strong> {{ workforce['DECIMO5']}}
+                    </li>
+										<li class="collection-item">
+                      <strong>DECIMO6: </strong> {{ workforce['DECIMO6']}}
+                    </li>
+										<li class="collection-item">
+                      <strong>Bonification: </strong> {{ workforce['bonification']}}
+                    </li>
+										<li class="collection-item">
+                      <strong>Compensaction: </strong> {{ workforce['Compensacion']}}
+                    </li>
+										<li class="collection-item">
+                      <strong>Compensaciones Salariales: </strong> {{ workforce['compensacionesSalariales']}}
+                    </li>
+										<li class="collection-item">
+                      <strong>transporte: </strong> {{ workforce['transporte']}}
+                    </li>
+										<li class="collection-item">
+                      <strong>Aporte Patronal: </strong> {{ workforce['aportePatronal']}}
+                    </li>
+										<li class="collection-item">
+                      <strong>Fondo Reserva: </strong> {{ workforce['fondoReserva']}}
+                    </li>
+										<li class="collection-item">
+                      <strong>Total Anio: </strong> {{ workforce['totalAnio']}}
+                    </li>
+										<li class="collection-item">
+                      <strong>Jornal Dia: </strong> {{ workforce['jornalDia']}}
+                    </li>
+										<li class="collection-item">
+                      <strong>Hourly Wage: </strong> {{ workforce['hourWage']}}
+                    </li>
+                  </ul>	
+									<div>
+										<a class="waves-effect waves-light btn grey darken-4" :href="`workforce_edit.html?id=${workforce['workForce_id']}`">Edit</a>
+										<a class="waves-effect waves-light btn red" href="#" v-on:click="deleteItem">Delete</a>
+									</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      const app = new Vue({
+        el: "#app",
+        data: {
+          item: null,
+          params: [],
+					workforce: null,
+        },
+        methods: {
+					deleteItem(){
+						const confirmation = confirm(`Are you sure you want to delete ${this.workforce['name']}?`)
+						if(confirmation){
+							eel.dbUPDATE(`DELETE FROM Workforces WHERE workForce_id=${this.workforce['workForce_id']}`)
+							alert("Successfully deleted!")
+							window.location = "items.html"
+						}
+					},
+          getParams: function () {
+            if (location.search) {
+              var parts = location.search.substring(1).split("&");
+
+              for (var i = 0; i < parts.length; i++) {
+                var nv = parts[i].split("=");
+                if (!nv[0]) continue;
+                this.params[nv[0]] = nv[1] || true;
+              }
+            }
+          },
+        },
+        created: function () {
+          this.getParams();
+
+          const id = this.params.id;
+
+
+          eel.dbGET("SELECT * FROM Workforces WHERE workForce_id=" + id)((response) => {
+            this.workforce = JSON.parse(response)[0];
+          });
+        },
+      });
+    </script>
+    <script></script>
+  </body>
+</html>
