@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Items</title>
+
+    <script type="text/javascript" src="/eel.js"></script>
+    <script type="text/javascript" src="./assets/js/vue.js"></script>
+
+    <link rel="stylesheet" href="assets/css/materialize.min.css" />
+    <script type="text/javascript" src="assets/js/materialize.min.js"></script>
+  </head>
+  <body>
+    <nav class="grey darken-4">
+      <div class="nav-wrapper">
+        <a href="#" class="brand-logo">
+          <img width="250px" src="assets/images/logo.png" />
+        </a>
+        <ul id="nav-mobile" class="right hide-on-med-and-down">
+          <li><a href="invoices.html">Invoices</a></li>
+          <li><a href="items.html">Items</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <div id="app">
+      <div class="">
+        <div class="row">
+          <div class="col s12">
+            <h3>Items</h3>
+
+            <div class="card">
+              <div class="card-stacked">
+                <div class="card-content">
+                  <form classrow>
+                    <div class="s12">
+                      <div class="input-field">
+                        <label for="material_id" class="active"
+                          >Material ID:
+                        </label>
+                        <input
+                          id="material_id"
+                          type="text"
+                          class="validate"
+                          v-model="material_id"
+													@change="idChanged"
+                        />
+                      </div>
+                      <div class="input-field">
+                        <label for="material" class="active"
+                          >Material Name:
+                        </label>
+                        <input
+                          @change="materialSelected"
+                          id="name"
+                          type="text"
+                          list="material_list"
+                          class="validate"
+                          v-model="material_name"
+                        />
+                        <datalist id="material_list">
+                          <option
+                            v-for="(material, index) in materials"
+                            :key="index"
+                          >
+                            {{ material['name'] }}
+                          </option>
+                        </datalist>
+                      </div>
+                      <div class="input-field">
+                        <label for="rff" class="active">Quantity: </label>
+                        <input
+                          id="rff"
+                          type="number"
+                          class="validate"
+                          v-model="quantity"
+													step="0.001"
+                        />
+                      </div>
+                    </div>
+
+                    <button type="button" class="btn" @click="add">Add</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script type="text/javascript">
+      const app = new Vue({
+        el: "#app",
+        data: function () {
+          return {
+            id: null,
+            params: [],
+            material_id: null,
+            material_name: null,
+            materials: null,
+            quantity: 0,
+          };
+        },
+        methods: {
+					add(){
+						eel.dbUPDATE(`INSERT INTO ItemsMaterials (quantity, item_id, material_id) VALUES ('${this.quantity}', '${this.id}', '${this.material_id}')`);
+
+						alert('Material is successfully added')
+						window.location = "materials_for_item.html?id="+this.id
+					},
+					idChanged(){
+						console.log(this.material_id);
+						this.materials.forEach((item) => {
+              if (item["material_id"] == this.material_id) {
+                this.material_name = item["name"];
+              }
+            });
+
+					},
+          materialSelected() {
+            this.materials.forEach((item) => {
+              if (item["name"] === this.material_name) {
+                this.material_id = item["material_id"];
+              }
+            });
+          },
+          getParams: function () {
+            if (location.search) {
+              var parts = location.search.substring(1).split("&");
+
+              for (var i = 0; i < parts.length; i++) {
+                var nv = parts[i].split("=");
+                if (!nv[0]) continue;
+                this.params[nv[0]] = nv[1] || true;
+              }
+            }
+          },
+        },
+        created: function () {
+          this.getParams();
+          this.id = this.params.id;
+
+          // get all materials id and name
+          eel.dbGET("SELECT material_id, name FROM Materials")((response) => {
+            this.materials = JSON.parse(response);
+          });
+
+        },
+      });
+    </script>
+    <script></script>
+  </body>
+</html>

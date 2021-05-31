@@ -40,7 +40,7 @@
               <div class="card-stacked">
                 <div class="card-content">
 									<div style="margin: 10px">
-										<table id="table" class="display" width="100%">
+										<table id="table" class="display" width="100%" >
 											<thead>
 												<tr>
 													<th>Material ID</th>
@@ -58,12 +58,16 @@
 													<td>
 														<a :href="'material_single.html?id='+material['material_id']">{{ material['name'] }}</a>
 													</td>
-													<td>{{ material['price'] }}</td>
+													<td>{{ material['price'] * material['quantity'] }}</td>
 													<td>{{ material['unit'] }}</td>
 													<td>{{ material['quantity'] }}</td>
 													<td></td>
+													<td>
+														<button class="waves-effect waves-light btn red" @click="remove(material['material_id'])">Remove</button>
+													</td>
 												</tr>
 											</tbody>
+											<a class="waves-effect waves-light btn" :href="`add_material_to_item.html?id=${id}`">Add Material</a>
 										</table>
 									</div>
                 </div>
@@ -77,11 +81,18 @@
       const app = new Vue({
         el: "#app",
         data: {
+					id: null,
           item: null,
           params: [],
 					materials: null,
         },
         methods: {
+					remove(material_id){
+						eel.dbUPDATE(`DELETE FROM ItemsMaterials WHERE item_id='${this.id}' AND material_id='${material_id}'`)
+
+						alert("Successfully deleted!")
+						window.location.reload()
+					},
 					
           getParams: function () {
             if (location.search) {
@@ -98,15 +109,25 @@
         created: function () {
           this.getParams();
 
-          const id = this.params.id;
+          this.id = this.params.id;
 
-					eel.dbGET("SELECT * FROM Items WHERE item_id=" + id)((response) => {
+					eel.dbGET("SELECT * FROM Items WHERE item_id=" + this.id)((response) => {
             this.item = JSON.parse(response)[0];
           });
 					
-					eel.dbGET(`SELECT * FROM Materials INNER JOIN ItemsMaterials ON Materials.material_id = ItemsMaterials.material_id WHERE ItemsMaterials.item_id=${id}`)((response) => {
+					eel.dbGET(`SELECT * FROM Materials INNER JOIN ItemsMaterials ON Materials.material_id = ItemsMaterials.material_id WHERE ItemsMaterials.item_id=${this.id}`)((response) => {
 						this.materials = JSON.parse(response);
+
+						console.log(this.materials);
+
+						$(document).ready(function(){
+							$('#table').DataTable({
+								"searching": true,
+							})
+						})
 					})
+
+				
         },
       });
     </script>
