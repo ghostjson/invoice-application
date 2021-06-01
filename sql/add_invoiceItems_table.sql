@@ -1,0 +1,6 @@
+CREATE TABLE invoiceItems (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	invoice_id INTEGER NOT NULL,
+	item_id INTEGER NOT NULL,
+	quantity NUMBER
+	);
