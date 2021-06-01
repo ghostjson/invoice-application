@@ -46,6 +46,7 @@
 													<th>Equipment ID</th>
 													<th>Name</th>
 													<th>Price</th>
+													<th>Quantity</th>
 													<th>Pot</th>
 													<th></th>
 													<th></th>
@@ -58,6 +59,7 @@
 														<a :href="'equipment_single.html?id='+equipment['equipment_id']">{{ equipment['name'] }}</a>
 													</td>
 													<td>{{ equipment['price'] * equipment['quantity'] }}</td>
+													<td>{{ equipment['quantity'] }}</td>
 													<td>{{ equipment['pot'] }}</td>
 													<td></td>
 													<td>
@@ -115,9 +117,6 @@
 					
 					eel.dbGET(`SELECT * FROM Equipments INNER JOIN ItemsEquipments ON Equipments.equipment_id = ItemsEquipments.equipment_id WHERE ItemsEquipments.item_id=${this.id}`)((response) => {
 						this.equipments = JSON.parse(response);
-
-						console.log(this.equipments);
-
 						$(document).ready(function(){
 							$('#table').DataTable({
 								"searching": true,
