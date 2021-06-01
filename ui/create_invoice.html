@@ -39,31 +39,31 @@
 				<div class="card-stacked">
 					<div class="card-content">
 						
-						<form class="row" action="create_invoice_add_items.html">
+						<form class="row" @submit="invoiceSubmit">
 							<div class="s12">
 								<div class="input-field">
 									<label for="name" class="active">Name: </label>
-									<input id="name" type="text" class="validate" name="name">
+									<input id="name" type="text" class="validate" name="name" v-model="invoice.name" required>
 								</div>
 								<div class="input-field">
 									<label for="client" class="active">Client: </label>
-									<input id="client" type="text" class="validate" name="client">
+									<input id="client" type="text" class="validate" name="client" required v-model="invoice.client">
 								</div>
 								<div class="input-field">
 									<label for="user" class="active">User: </label>
-									<input id="user" type="text" class="validate" name="user">
+									<input id="user" type="text" class="validate" name="user" required v-model="invoice.user">
 								</div>
 								<div class="input-field">
 									<label for="smv" class="active">SMV: </label>
-									<input id="smv" type="text" class="validate" name="smv">
+									<input id="smv" type="text" class="validate" name="smv" required v-model="invoice.smv">
 								</div>
-								<div class="input-field">
+								<!-- <div class="input-field">
 									<label for="indirect-profit" class="active">Indirect Profit: </label>
 									<input id="indirect-profit" type="text" class="validate" name="profit">
-								</div>
+								</div> -->
 								<div class="input-field">
 									<label for="location" class="active">Location: </label>
-									<input id="location" type="text" class="validate" name="location">
+									<input id="location" type="text" class="validate" name="location" required v-model="invoice.location">
 								</div>
 								<button class="btn btn-primary modal-trigger" type="submit">Next</button>
 							</div>
@@ -77,7 +77,29 @@
         el: "#app",
         data: {
           message: "Hello",
+					invoice: {
+						name: '',
+						client: '',
+						user: '',
+						smv: '',
+						location: ''
+					}
         },
+				methods: {
+					invoiceSubmit: function(e){
+						e.preventDefault()
+
+						const invoice = this.invoice
+
+						eel.dbUPDATE(`INSERT INTO Invoices (name, client, user, smv, location) VALUES ('${invoice.name}', '${invoice.client}', '${invoice.user}', '${invoice.smv}', '${invoice.location}')`)
+
+						eel.dbGET(`SELECT invoice_id FROM Invoices ORDER BY invoice_id DESC LIMIT 1`)((response) => {
+							const id = JSON.parse(response)[0]['invoice_id']
+
+							window.location = `create_invoice_add_items.html?id=${id}`
+						})
+					}
+				}
       });
     </script>
     <script>

@@ -56,88 +56,35 @@
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>Test</td>
-              <td>Test</td>
-              <td>Test</td>
-              <td>Test</td>
-              <td>Test</td>
-              <td>Test</td>
+            <tr v-for="(invoice_item, index) in invoice_items" :key="index">
+
+							<td>{{ invoice_item['id'] }} </td>
+							<td>{{ invoice_item['name'] }} </td>
+							<td> {{ invoice_item['quantity']}} </td>
+							<td> {{ invoice_item['unit'] }} </td>
+							<td>0</td>
+							<td>0</td>
+
               <td>
-								<a class="waves-effect waves-light btn red" href="#">Remove</a>
-							</td>
-            </tr>
-						<tr>
-              <td>Test</td>
-              <td>Test</td>
-              <td>Test</td>
-              <td>Test</td>
-              <td>Test</td>
-              <td>Test</td>
-              <td>
-								<a class="waves-effect waves-light btn red" href="#">Remove</a>
-							</td>
-            </tr>
-						<tr>
-              <td>Test</td>
-              <td>Test</td>
-              <td>Test</td>
-              <td>Test</td>
-              <td>Test</td>
-              <td>Test</td>
-              <td>
-								<a class="waves-effect waves-light btn red" href="#">Remove</a>
-							</td>
-            </tr>
-						<tr>
-              <td>Test</td>
-              <td>Test</td>
-              <td>Test</td>
-              <td>Test</td>
-              <td>Test</td>
-              <td>Test</td>
-              <td>
-								<a class="waves-effect waves-light btn red" href="#">Remove</a>
-							</td>
-            </tr>
-						<tr>
-              <td>Test</td>
-              <td>Test</td>
-              <td>Test</td>
-              <td>Test</td>
-              <td>Test</td>
-              <td>Test</td>
-              <td>
-								<a class="waves-effect waves-light btn red" href="#">Remove</a>
-							</td>
-            </tr>
-						<tr>
-              <td>Test</td>
-              <td>Test</td>
-              <td>Test</td>
-              <td>Test</td>
-              <td>Test</td>
-              <td>Test</td>
-              <td>
-								<a class="waves-effect waves-light btn red" href="#">Remove</a>
+								<button class="waves-effect waves-light btn red" @click="removeItem(invoice_item['id'])" >Remove</button>
 							</td>
             </tr>
           </tbody>
         </table>
 				</div>
 				<div class="card-action">
-					<button class="waves-effect waves-light btn grey darken-4"type="button">Submit</button>
+					<a href="invoices.html" class="waves-effect waves-light btn grey darken-4" type="button">FINISH</a>
 				</div>
       </div>
 
 
 			<div class="footer z-depth-1" style="text-align: right; padding: 5px;">
-				<input type="text" class="validate" placeholder="Item Name" list="items">
+				<input type="text" class="validate" placeholder="Item Name" list="items" v-model="item_name">
 				<datalist id="items">
-					<option>value 1</option>
-					<option>value 2</option>
+					<option v-for="(item, index) in items" :key="index">{{ item['name'] }}</option>
 				</datalist>
-				<button class="waves-effect waves-light btn grey darken-4">Add Item</button>
+				<input type="number" step="0.0001" class="validate" placeholder="Quantity" v-model="quantity">
+				<button class="waves-effect waves-light btn grey darken-4" @click="addItem">Add Item</button>
 			</div>
     </div>
     <script>
@@ -145,13 +92,61 @@
         el: "#app",
         data: {
           message: "Hello",
+					items: null,
+					item_name: '',
+					quantity: null,
+					params: [],
+					invoice_items: null,
         },
+				methods: {
+					addItem(){
+						this.items.forEach((item) => {
+							if(item['name'] == this.item_name){
+								eel.dbUPDATE(`INSERT INTO invoiceItems (invoice_id,item_id,quantity) \
+								VALUES ('${this.params.id}', '${item["item_id"]}', '${this.quantity}')`)
+								window.location.reload()
+							}
+						})
+					},
+					removeItem(id){
+						let confirmation = confirm(`Are you sure you want to delete this item?`)
+						if(confirmation){
+							eel.dbUPDATE(`DELETE FROM invoiceItems WHERE id=${id}`)
+							window.location.reload()
+						}
+					},
+					getParams: function () {
+            if (location.search) {
+              var parts = location.search.substring(1).split("&");
+
+              for (var i = 0; i < parts.length; i++) {
+                var nv = parts[i].split("=");
+                if (!nv[0]) continue;
+                this.params[nv[0]] = nv[1] || true;
+              }
+            }
+          },
+				},
+				created: function () {
+
+					this.getParams()
+
+					eel.dbGET("SELECT item_id, name FROM Items")((response) => {
+						this.items = JSON.parse(response)
+					})
+
+					eel.dbGET(`SELECT * FROM Items INNER JOIN invoiceItems ON Items.item_id = invoiceItems.item_id WHERE invoiceItems.invoice_id='${this.params.id}'`)(response => {
+						this.invoice_items = JSON.parse(response)
+
+						$(document).ready(function () {
+							$("#table").DataTable();
+						});
+					})
+				}
       });
     </script>
     <script>
-      $(document).ready(function () {
-        $("#table").DataTable();
-      });
+
     </script>
   </body>
 </html>

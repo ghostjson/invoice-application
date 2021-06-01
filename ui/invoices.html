@@ -17,14 +17,15 @@
       src="assets/js/jquery.dataTables.min.js"
     ></script>
 
-		<style>
-			.footer{
-				position: fixed;
-				width: 100%;
-				bottom: 0;
-				z-index: 10;
-			}
-		</style>
+    <style>
+      .footer {
+        position: fixed;
+        width: 100%;
+        bottom: 0;
+        z-index: 10;
+				background: white;
+      }
+    </style>
   </head>
   <body>
     <nav class="grey darken-4">
@@ -40,54 +41,71 @@
     </nav>
 
     <div id="app">
-      <div class="card" style="margin-bottom: 50px;">
-				<div class="card-content">
-        <table id="table" class="display" width="100%">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Client</th>
-              <th>Location</th>
-							<th>User</th>
-							<th>Date</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Test</td>
-              <td>Test</td>
-              <td>Test</td>
-              <td>Test</td>
-              <td>Test</td>
-              <td>Test</td>
-              <td>
-								<a class="waves-effect waves-light btn green" href="#">Edit</a>
-								<a class="waves-effect waves-light btn red" href="#">Remove</a>
-							</td>
-            </tr>
-          </tbody>
-        </table>
-				</div>
+      <div class="card" style="margin-bottom: 50px">
+        <div class="card-content">
+          <table id="table" class="display" width="100%">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Client</th>
+                <th>Location</th>
+                <th>User</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(invoice, index) in invoices" :key="index">
+                <td>{{ invoice['invoice_id'] }}</td>
+                <td>{{ invoice['name'] }}</td>
+                <td>{{ invoice['client'] }}</td>
+                <td>{{ invoice['location'] }}</td>
+                <td>{{ invoice['user'] }}</td>
+                <td>
+									<a class="waves-effect waves-light btn green" href="#"
+                    >Edit</a
+                  >
+                  <button class="waves-effect waves-light btn red" @click="remove(invoice['invoice_id'])"
+                    >Remove</button>
+										<button class="waves-effect waves-light btn grey darken-4">Export</button>
+                </td>
+
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
-
-			<div class="footer z-depth-1" style="text-align: right; padding: 5px;">
-				<a class="waves-effect waves-light btn grey darken-4" href="create_invoice.html">Create Quote</a>
-			</div>
+      <div class="footer z-depth-1" style="text-align: right; padding: 5px; padding-right: 15px;">
+        <a
+          class="waves-effect waves-light btn grey darken-4"
+          href="create_invoice.html"
+          >Create Quote</a
+        >
+      </div>
     </div>
     <script>
       const app = new Vue({
         el: "#app",
         data: {
           message: "Hello",
+          invoices: null,
         },
-      });
-    </script>
-    <script>
-      $(document).ready(function () {
-        $("#table").DataTable();
+				methods: {
+					remove(id){
+						eel.dbUPDATE(`DELETE FROM Invoices WHERE invoice_id=${id}`)
+
+						window.location.reload()
+					}
+				},
+        created: function () {
+          eel.dbGET("SELECT * FROM Invoices")((response) => {
+            this.invoices = JSON.parse(response);
+            $(document).ready(function () {
+              $("#table").DataTable();
+            });
+          });
+        },
       });
     </script>
   </body>
