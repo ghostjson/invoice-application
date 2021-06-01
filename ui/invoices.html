@@ -62,7 +62,10 @@
                 <td>{{ invoice['location'] }}</td>
                 <td>{{ invoice['user'] }}</td>
                 <td>
-									<a class="waves-effect waves-light btn green" href="#"
+									<a class="waves-effect waves-light btn" :href="'invoice_single.html?id='+invoice['invoice_id']">
+										View
+									</a>
+									<a class="waves-effect waves-light btn green" :href="'create_invoice_add_items.html?id='+invoice['invoice_id']"
                     >Edit</a
                   >
                   <button class="waves-effect waves-light btn red" @click="remove(invoice['invoice_id'])"
@@ -94,7 +97,6 @@
 				methods: {
 					remove(id){
 						eel.dbUPDATE(`DELETE FROM Invoices WHERE invoice_id=${id}`)
-
 						window.location.reload()
 					}
 				},

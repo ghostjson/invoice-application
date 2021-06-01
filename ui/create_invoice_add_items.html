@@ -59,7 +59,9 @@
             <tr v-for="(invoice_item, index) in invoice_items" :key="index">
 
 							<td>{{ invoice_item['id'] }} </td>
-							<td>{{ invoice_item['name'] }} </td>
+							<td>
+								<a :href="'item_single.html?id='+invoice_item['item_id']">{{ invoice_item['name'] }} </a>
+							</td>
 							<td> {{ invoice_item['quantity']}} </td>
 							<td> {{ invoice_item['unit'] }} </td>
 							<td>0</td>
