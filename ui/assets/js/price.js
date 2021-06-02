@@ -69,3 +69,14 @@ async function getTotalWorkforcePrice(item_id){
     });
   });
 }
+
+async function getTotalItemPrice(item_id){
+
+	let workforce = await getTotalWorkforcePrice(item_id)
+	let material = await getTotalMaterialsPrice(item_id)
+	let equipment = await getTotalEquipmentPrice(item_id)
+
+	return new Promise((resolve, reject) => {
+		resolve(workforce+material+equipment)
+	})
+}

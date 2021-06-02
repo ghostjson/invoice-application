@@ -16,6 +16,7 @@
       type="text/javascript"
       src="assets/js/jquery.dataTables.min.js"
     ></script>
+    <script type="text/javascript" src="assets/js/price.js"></script>
   </head>
   <body>
     <nav class="grey darken-4">
@@ -39,14 +40,14 @@
             <div class="card">
               <div class="card-stacked">
                 <div class="card-content">
-									<h5>General Information</h5>
+                  <h5>General Information</h5>
                   <ul class="collection">
                     <li class="collection-item">
                       <strong>Invoice ID: </strong> {{ invoice['invoice_id'] }}
                     </li>
-                     <li class="collection-item">
+                    <li class="collection-item">
                       <strong>Name: </strong> {{ invoice['name'] }}
-                    </li>                   
+                    </li>
                     <li class="collection-item">
                       <strong>Client: </strong> {{ invoice['client'] }}
                     </li>
@@ -57,21 +58,22 @@
                       <strong>SMV: </strong> {{ invoice['SMV'] }}
                     </li>
                     <li class="collection-item">
-                      <strong>Profit: </strong> {{ invoice['profit'] }}
+                      <strong>Profit: </strong> {{ total_item_price }}
                     </li>
                     <li class="collection-item">
                       <strong>Location: </strong> {{ invoice['location'] }}
                     </li>
                   </ul>
-									
                 </div>
-								<div class="card-action">
-									<a :href="'create_invoice_add_items.html?id='+invoice['invoice_id']" class="waves-effect waves-light btn">Edit Items</a>
-								</div>
+                <div class="card-action">
+                  <a
+                    :href="'create_invoice_add_items.html?id='+invoice['invoice_id']"
+                    class="waves-effect waves-light btn"
+                    >Edit Items</a
+                  >
+                </div>
               </div>
             </div>
-						
-						
           </div>
         </div>
       </div>
@@ -82,7 +84,8 @@
         data: {
           invoice: null,
           params: [],
-					items: null,
+          items: null,
+					total_item_price: 0
         },
         methods: {
           getParams: function () {
@@ -102,16 +105,24 @@
 
           const id = this.params.id;
 
-					eel.dbGET("SELECT * FROM Invoices WHERE invoice_id=" + id)((response) => {
-						this.invoice = JSON.parse(response)[0];
-					})
+          eel.dbGET("SELECT * FROM Invoices WHERE invoice_id=" + id)(
+            (response) => {
+              this.invoice = JSON.parse(response)[0];
+            }
+          );
 
+          eel.dbGET(
+            `SELECT * FROM Items INNER JOIN invoiceItems ON Items.item_id = invoiceItems.item_id WHERE invoiceItems.invoice_id='${this.params.id}'`
+          )((response) => {
+            this.items = JSON.parse(response);
 
-					// eel.dbGET("SELECT * FROM Items INNER JOIN invoiceItems ON invoiceItems.item_id = Items.item_id WHERE invoiceItems.invoice_id="+ id)((response)=> {
-					// 	this.items = JSON.parse(response);
-					// 	console.log(this.items);
-					// })
-          
+            let total = 0;
+            this.items.forEach((item) => {
+              getTotalItemPrice(item["item_id"]).then((price) => {
+								this.total_item_price += price
+              });
+            });
+          });
         },
       });
     </script>
