@@ -17,6 +17,8 @@
       src="assets/js/jquery.dataTables.min.js"
     ></script>
 
+		<script type="text/javascript" src="assets/js/price.js"></script>
+
 		<style>
 			.footer{
 				position: fixed;
@@ -64,8 +66,8 @@
 							</td>
 							<td> {{ invoice_item['quantity']}} </td>
 							<td> {{ invoice_item['unit'] }} </td>
-							<td>0</td>
-							<td>0</td>
+							<td>{{ unit_price[index] }}</td>
+							<td>{{ invoice_item['quantity'] * unit_price[index] }}</td>
 
               <td>
 								<button class="waves-effect waves-light btn red" @click="removeItem(invoice_item['id'])" >Remove</button>
@@ -99,6 +101,7 @@
 					quantity: null,
 					params: [],
 					invoice_items: null,
+					unit_price: []
         },
 				methods: {
 					addItem(){
@@ -135,10 +138,19 @@
 
 					eel.dbGET("SELECT item_id, name FROM Items")((response) => {
 						this.items = JSON.parse(response)
+						console.log(this.items);
 					})
 
 					eel.dbGET(`SELECT * FROM Items INNER JOIN invoiceItems ON Items.item_id = invoiceItems.item_id WHERE invoiceItems.invoice_id='${this.params.id}'`)(response => {
 						this.invoice_items = JSON.parse(response)
+
+						this.invoice_items.forEach((invoiceItem,index) =>{
+							getTotalItemPrice(invoiceItem['item_id']).then(price =>{
+								this.unit_price.push(price)
+							})
+
+						})
+
 
 						$(document).ready(function () {
 							$("#table").DataTable();
