@@ -70,7 +70,7 @@
                   >
                   <button class="waves-effect waves-light btn red" @click="remove(invoice['invoice_id'])"
                     >Remove</button>
-										<button class="waves-effect waves-light btn grey darken-4">Export</button>
+										<button @click="exportInvoice(invoice['invoice_id'])" class="waves-effect waves-light btn grey darken-4">Export</button>
                 </td>
 
               </tr>
@@ -78,6 +78,7 @@
           </table>
         </div>
       </div>
+			<iframe id="download" style="display:none;"></iframe>
 
       <div class="footer z-depth-1" style="text-align: right; padding: 5px; padding-right: 15px;">
         <a
@@ -98,6 +99,13 @@
 					remove(id){
 						eel.dbUPDATE(`DELETE FROM Invoices WHERE invoice_id=${id}`)
 						window.location.reload()
+					},
+					exportInvoice(id){
+						eel.export(id, `ui/exports/${id}.xlsx`)((response) => {
+							const downloadFrame = document.getElementById("download")
+							downloadFrame.src = `/exports/${id}.xlsx`
+							console.log(`assets/exports/${id}.xlsx`);
+						})
 					}
 				},
         created: function () {

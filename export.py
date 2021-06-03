@@ -14,6 +14,7 @@ INVOICE_USER = 'B3'
 INVOICE_SMV = 'B4'
 INVOICE_LOCATION = 'B5'
 
+# DEMO INVOICE ID
 INVOICE_ID = 5
 
 
@@ -207,12 +208,22 @@ def setItemsDetailSheet(invoice_data, save_location):
 			current_sheet['G'+ str(starting_row+no_of_materials)] = "=SUM(G{}:G{})".format(starting_row,starting_row + no_of_materials - 1)
 			total_material_price = current_sheet['G'+str(starting_row+no_of_materials)].value
 
-		current_sheet['G'+str(starting_row+no_of_materials+2)] = "=({}+{}+{})".format(total_material_price[1:], total_equipment_price[1:], total_workforce_price[1:])
-		current_sheet['G'+str(starting_row+no_of_materials+3)] = "=({}*({})/100)".format(current_sheet['G'+str(starting_row+no_of_materials+2)].value[1:], 'F'+str(starting_row+no_of_materials+3))
+		if no_of_materials == 0:
+			current_sheet['G'+str(starting_row+no_of_materials+2)] = "=({}+{})".format(total_equipment_price[1:], total_workforce_price[1:])
+		
+		if no_of_equipments == 0:
+			current_sheet['G'+str(starting_row+no_of_materials+2)] = "=({}+{})".format(total_material_price[1:], total_workforce_price[1:])
+		
+		if no_of_workforces == 0:
+			current_sheet['G'+str(starting_row+no_of_materials+2)] = "=({}+{})".format(total_material_price[1:], total_equipment_price[1:])
 
+		
+		if no_of_materials != 0 and no_of_equipments != 0 and no_of_workforces !=0:
+			current_sheet['G'+str(starting_row+no_of_materials+2)] = "=({}+{}+{})".format(total_material_price[1:], total_equipment_price[1:], total_workforce_price[1:])
+		
+		current_sheet['G'+str(starting_row+no_of_materials+3)] = "=({}*({})/100)".format(current_sheet['G'+str(starting_row+no_of_materials+2)].value[1:], 'F'+str(starting_row+no_of_materials+3))
 		current_sheet['G'+str(starting_row+no_of_materials+7)].value = current_sheet['G'+str(starting_row+no_of_materials+8)].value  = "=SUM({}, {})".format(current_sheet['G'+str(starting_row+no_of_materials+3)].value[1:], current_sheet['G'+str(starting_row+no_of_materials+2)].value[1:])
 		
-
 
 	invoice.remove(detail_template)
 	invoice.save(save_location)
@@ -227,6 +238,7 @@ def invoiceItems(invoice_id):
 	return invoice_items
 
 # export function
+@eel.expose
 def export(invoice_id, save_location):
 
 	copyfile(INVOICE_TEMPLATE, save_location)
@@ -240,8 +252,8 @@ def export(invoice_id, save_location):
 	setInvoiceSheet(invoice_data, save_location)
 	setItemsDetailSheet(invoice_data, save_location)
 
+	return save_location
+
 
 if __name__ == '__main__':
 	export(INVOICE_ID, 'resources/exports/test.xlsx')
-	# getItemPrice(5)
-	# invoiceItems(INVOICE_ID)
