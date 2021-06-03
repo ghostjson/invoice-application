@@ -2,8 +2,12 @@ from openpyxl import Workbook, load_workbook
 from database import *
 from shutil import copyfile
 import json
+from openpyxl.styles.borders import Border, Side
 
-INVOICE_TEMPLATE = 'resources/templates/invoice.xlsx'
+INVOICE_TEMPLATE = 'resources/templates/invoice_template.xlsx'
+
+# =================================INVOICE SHEET================================ #
+
 INVOICE_CLIENT = 'B1'
 INVOICE_NAME = 'B2'
 INVOICE_USER = 'B3'
@@ -19,6 +23,24 @@ INVOICE_ITEM_QUANTITY = 'C8'
 INVOICE_ITEM_UNIT = 'D8'
 INVOICE_ITEM_UNIT_VALUE = 'E8'
 INVOICE_ITEM_TOTAL_VALUE = 'F8'
+
+# =============================================================================== #
+
+# =================================ITEM DETAIL PAGE============================== #
+ITEM_NAME = 'A4'
+ITEM_PERFORMANCE = 'E5'
+ITEM_UNIT = 'G5'
+
+# =============================================================================== #
+BORDER = Border(left=Side(style='thin'), right=Side(style='thin'), top=Side(style='thin'), bottom=Side(style='thin'))
+# =============================================================================== #
+
+
+# apply border
+def applyBorder(sheet, row, col_start, col_end):
+
+	for col in range(col_start, col_end+1):
+		sheet.cell(row, col).border = BORDER
 
 # return total price of an item
 def getItemPrice(item_id):
@@ -47,11 +69,10 @@ def getItemPrice(item_id):
 	return total
 
 # set invoice sheet
-def setInvoiceSheet(invoice_data):
+def setInvoiceSheet(invoice_data, save_location):
 
-	copyfile(INVOICE_TEMPLATE, 'resources/exports/test.xlsx')
 
-	invoice = load_workbook('resources/exports/test.xlsx')
+	invoice = load_workbook(save_location)
 	invoice_sheet = invoice['invoice']
 
 	invoice_sheet[INVOICE_NAME] = invoice_data['name']
@@ -89,7 +110,114 @@ def setInvoiceSheet(invoice_data):
 	invoice_sheet[INVOICE_TOTAL] = "=SUM({}:{})".format(INVOICE_SUB_TOTAL, INVOICE_PROFIT)
 
 
-	invoice.save('resources/exports/test.xlsx')
+	invoice.save(save_location)
+
+def setItemsDetailSheet(invoice_data, save_location):
+	invoice = load_workbook(save_location)
+	detail_template = invoice['item_detail']
+
+	items = invoiceItems(invoice_data['invoice_id'])
+
+	for item in items:
+
+		# create sheet for each item
+		invoice.copy_worksheet(detail_template)
+		current_sheet = invoice['item_detail Copy']
+		current_sheet.title = str(item['item_id'])
+
+		# insert equipments to the item sheet
+		get_equipment_query = "SELECT * FROM Equipments INNER JOIN ItemsEquipments \
+													 ON Equipments.equipment_id = ItemsEquipments.equipment_id	\
+													 WHERE ItemsEquipments.item_id={}".format(item['item_id'])
+		equipments = json.loads(dbGET(get_equipment_query))
+
+		no_of_equipments = len(equipments)
+
+		if no_of_equipments > 0:
+			for equipment in equipments:
+				current_sheet.insert_rows(9)
+
+				current_sheet['A9'] = equipment['name']
+				# current_sheet['A9'].border = BORDER
+				current_sheet['C9'] = equipment['quantity']
+				current_sheet['D9'] = equipment['price']
+				current_sheet['E9'] = equipment['price']
+				current_sheet['G9'] = equipment['price'] * equipment['quantity']
+
+				applyBorder(current_sheet, 9, 1, 7)
+
+			current_sheet['G{}'.format(9+no_of_equipments)] = "=SUM(G9:G{})".format(8+no_of_equipments)
+			total_equipment_price = current_sheet['G{}'.format(9+no_of_equipments)].value
+
+		# insert workforce to the item sheet
+		get_workforces_query = "SELECT * FROM Workforces INNER JOIN ItemsWorkforces \
+														ON Workforces.workForce_id = ItemsWorkforces.workForce_id \
+														WHERE ItemsWorkforces.item_id={}".format(item['item_id'])
+		workforces = json.loads(dbGET(get_workforces_query))
+
+		no_of_workforces = len(workforces)
+
+		starting_row = 12 + no_of_equipments
+
+		if no_of_workforces > 0:
+			for workforce in workforces:
+				current_sheet.insert_rows(starting_row)
+
+				s = str(starting_row)
+
+				current_sheet['A{}'.format(s)] = workforce['name']
+				current_sheet['C{}'.format(s)] = workforce['quantity']
+				current_sheet['D{}'.format(s)] = workforce['hourWage']
+				current_sheet['E{}'.format(s)] = workforce['hourWage']
+				current_sheet['G{}'.format(s)] = workforce['hourWage'] * workforce['quantity']
+
+
+				applyBorder(current_sheet, starting_row, 1, 7)
+
+
+			current_sheet['G'+ str(12+no_of_equipments+no_of_workforces)] = "=SUM(G{}:G{})".format(starting_row,starting_row+no_of_workforces - 1)
+			total_workforce_price = current_sheet['G'+str(12+no_of_equipments+no_of_workforces)].value
+
+		# insert materials to the item sheet
+		get_material_query = "SELECT * FROM Materials INNER JOIN ItemsMaterials \
+														ON Materials.material_id = ItemsMaterials.material_id \
+														WHERE ItemsMaterials.item_id={}".format(item['item_id'])
+		materials = json.loads(dbGET(get_material_query))
+
+		no_of_materials = len(materials)
+
+		starting_row = 15 + no_of_equipments + no_of_workforces
+
+		if(no_of_materials > 0):
+			for material in materials:
+				current_sheet.insert_rows(starting_row)
+
+				s = str(starting_row)
+
+				current_sheet['A{}'.format(s)] = material['name']
+				current_sheet['C{}'.format(s)] = material['quantity']
+				current_sheet['D{}'.format(s)] = material['price']
+				current_sheet['E{}'.format(s)] = material['price']
+				current_sheet['G{}'.format(s)] = material['price'] * material['quantity']
+
+
+				applyBorder(current_sheet, starting_row, 1, 7)
+
+
+			current_sheet['G'+ str(starting_row+no_of_materials)] = "=SUM(G{}:G{})".format(starting_row,starting_row + no_of_materials - 1)
+			total_material_price = current_sheet['G'+str(starting_row+no_of_materials)].value
+
+		current_sheet['G'+str(starting_row+no_of_materials+2)] = "=({}+{}+{})".format(total_material_price[1:], total_equipment_price[1:], total_workforce_price[1:])
+		current_sheet['G'+str(starting_row+no_of_materials+3)] = "=({}*({})/100)".format(current_sheet['G'+str(starting_row+no_of_materials+2)].value[1:], 'F'+str(starting_row+no_of_materials+3))
+
+		current_sheet['G'+str(starting_row+no_of_materials+7)].value = current_sheet['G'+str(starting_row+no_of_materials+8)].value  = "=SUM({}, {})".format(current_sheet['G'+str(starting_row+no_of_materials+3)].value[1:], current_sheet['G'+str(starting_row+no_of_materials+2)].value[1:])
+		
+
+
+	invoice.remove(detail_template)
+	invoice.save(save_location)
+
+
 
 # return items in a invoice
 def invoiceItems(invoice_id):
@@ -99,14 +227,21 @@ def invoiceItems(invoice_id):
 	return invoice_items
 
 # export function
-def export(invoice_id):
+def export(invoice_id, save_location):
+
+	copyfile(INVOICE_TEMPLATE, save_location)
+
+	invoice = load_workbook(save_location)
+
+	invoice_sheet = invoice['invoice']
 	invoices = dbGET('SELECT * FROM Invoices WHERE invoice_id='+ str(invoice_id))
 	invoice_data = json.loads(invoices)[0]
 
-	setInvoiceSheet(invoice_data)
+	setInvoiceSheet(invoice_data, save_location)
+	setItemsDetailSheet(invoice_data, save_location)
 
 
 if __name__ == '__main__':
-	export(INVOICE_ID)
+	export(INVOICE_ID, 'resources/exports/test.xlsx')
 	# getItemPrice(5)
 	# invoiceItems(INVOICE_ID)

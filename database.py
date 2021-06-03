@@ -9,8 +9,8 @@ DB = "./database.db"
 @eel.expose
 def dbGET(query):
 
-	print("dbGET execution started\n\n\n")
-	print("Query going to execute is " + query + "\n\n\n")
+	# print("dbGET execution started\n\n\n")
+	# print("Query going to execute is " + query + "\n\n\n")
 
 	conn = sqlite3.connect( DB )
 	conn.row_factory = sqlite3.Row # This enables column access by name: row['column_name'] 
@@ -23,9 +23,9 @@ def dbGET(query):
 	conn.commit()
 	conn.close()
 
-	print("result is " + formated + "\n\n\n")
+	# print("result is " + formated + "\n\n\n")
 
-	print("dbGET execution finished" + "\n\n\n")
+	# print("dbGET execution finished" + "\n\n\n")
    
 	return formated
 
