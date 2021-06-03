@@ -2,6 +2,8 @@
 
 This is a desktop application to create and export invoices to excel sheets.
 
+![App Screenshot](https://github.com/ghostjson/invoice-application/blob/master/resources/screenshot.png)
+
 
 ## Tech Stack
 ### Langauges
