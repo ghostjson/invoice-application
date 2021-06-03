@@ -9,4 +9,4 @@ def test():
 
 
 eel.init('ui')
-eel.start('invoices.html',size=(1000, 600))
+eel.start('login.html',size=(1000, 600))

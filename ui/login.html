@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Material Edit</title>
+
+    <script type="text/javascript" src="/eel.js"></script>
+    <script type="text/javascript" src="./assets/js/vue.js"></script>
+
+    <link rel="stylesheet" href="assets/css/materialize.min.css" />
+    <script type="text/javascript" src="assets/js/materialize.min.js"></script>
+
+  </head>
+  <body>
+
+
+		<nav class="grey darken-4">
+      <div class="nav-wrapper">
+        <a href="#" class="brand-logo">
+          <img width="250px" src="assets/images/logo.png" />
+        </a>
+      </div>
+    </nav>
+
+    <div id="app">
+      <div class="">
+        <div class="row">
+          <div class="col s12">
+            <h3>Login</h3>
+
+            <div class="card">
+              <div class="card-stacked">
+                <div class="card-content">
+									<form class="row">
+
+										<small v-if="error" class="red-text">Incorrect username or password</small>
+
+										<div class="input-field">
+											<label for="username">Username: </label>
+											<input id="username" type="text" class="validate" v-model="username">
+										</div>
+
+										<div class="input-field">
+											<label for="password" >password: </label>
+											<input id="password" type="text" class="validate" v-model="password">
+										</div>
+										<button type="button" class="btn" @click="login">Submit</button>
+									</form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      const app = new Vue({
+        el: "#app",
+        data: {
+					username: '',
+					password: '',
+					error: false
+        },
+        methods: {
+					login(){
+
+						if(this.username == 'cenac' && this.password == 'cenacpass'){
+							window.location = 'invoices.html'
+						}else{
+							this.error = true
+						}
+					}
+        },
+        created: function () {
+				}
+      });
+    </script>
+    <script></script>
+  </body>
+</html>
